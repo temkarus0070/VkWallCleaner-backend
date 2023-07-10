@@ -1,0 +1,40 @@
+﻿server.port: 8081
+spring:
+  security:
+    oauth2:
+      client:
+        registration:
+          keycloak:
+            client-id: vk-wall
+            authorization-grant-type: authorization_code
+            scope: openid
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8080/realms/temkarus0070
+            user-name-attribute: preferred_username
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/temkarus0070
+          jwk-set-uri: ${spring.security.oauth2.resourceserver.jwt.issuer-uri}/protocol/openid-connect/certs
+  datasource:
+    password: postgres
+    username: postgres
+    url: jdbc:postgresql://localhost:5432/vk_trash
+    driver-class-name: org.postgresql.Driver
+  liquibase.change-log: classpath:db/changelog/master.xml
+
+
+jwt:
+  auth:
+    converter:
+      resource-id: vkWallCleaner
+      principal-attribute: preferred_username
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+application:
+  frontend-url: http://localhost:4200
+  keycloak-url: http://localhost:8080/realms/temkarus0070/protocol/openid-connect/token
+  search.giveaways-words: выиграйте,выиграй,приз,конкурс,розыгрыш,разыграем,разыгрываем,разыграет,подарим,победителя,дарим
+  cleaner.giveaways-words: выиграйте,выиграй,приз,конкурс,розыгрыш,разыграем,разыгрываем,разыграет,подарим,победителя,дарим
