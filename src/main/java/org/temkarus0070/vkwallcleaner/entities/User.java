@@ -9,11 +9,9 @@ import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.BatchSize;
-import org.hibernate.annotations.Fetch;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.List;
 
 @Entity
 @Getter
@@ -23,9 +21,6 @@ public class User {
 
     @Id
     private int vkId;
-    private String password;
-    private String vkToken;
-
 
     @ElementCollection()
     @BatchSize(size = 15)

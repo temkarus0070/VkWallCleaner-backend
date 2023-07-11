@@ -1,26 +1,38 @@
 package org.temkarus0070.vkwallcleaner.services;
 
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.temkarus0070.vkwallcleaner.Repositories.UserRepository;
+import org.temkarus0070.vkwallcleaner.entities.User;
+
+import java.util.Optional;
 
 @Service
+@AllArgsConstructor
 public class UserService {
-    public String getCurrentUserVkToken(){
+
+    private UserRepository userRepository;
+
+    public String getCurrentUserVkToken() {
         Authentication authentication = SecurityContextHolder.getContext()
                                                              .getAuthentication();
-        OAuth2AuthenticationToken authentication1 = (OAuth2AuthenticationToken) authentication;
-        return (String) authentication1.getPrincipal()
-                                       .getAttributes()
+        JwtAuthenticationToken authentication1 = (JwtAuthenticationToken) authentication;
+        return (String) authentication1.getTokenAttributes()
                                        .get("vkToken");
     }
-    public int getCurrentUserVkId(){
+
+    public int getCurrentUserVkId() {
         Authentication authentication = SecurityContextHolder.getContext()
                                                              .getAuthentication();
-        OAuth2AuthenticationToken authentication1 = (OAuth2AuthenticationToken) authentication;
-        return Integer.parseInt((String) authentication1.getPrincipal()
-                                       .getAttributes()
-                                       .get("vkId"));
+        JwtAuthenticationToken authentication1 = (JwtAuthenticationToken) authentication;
+        return Integer.parseInt((String) authentication1.getTokenAttributes()
+                                                        .get("vkId"));
+    }
+
+    public Optional<User> getCurrentUser(int currentUserVkId) {
+        return userRepository.findById(currentUserVkId);
     }
 }

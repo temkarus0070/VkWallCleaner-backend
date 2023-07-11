@@ -22,6 +22,9 @@ spring:
     url: jdbc:postgresql://localhost:5432/vk_trash
     driver-class-name: org.postgresql.Driver
   liquibase.change-log: classpath:db/changelog/master.xml
+  jpa:
+    show-sql: true
+
 
 
 jwt:
@@ -30,9 +33,6 @@ jwt:
       resource-id: vkWallCleaner
       principal-attribute: preferred_username
 
-logging:
-  level:
-    org.springframework.security: DEBUG
 application:
   frontend-url: http://localhost:4200
   keycloak-url: http://localhost:8080/realms/temkarus0070/protocol/openid-connect/token
