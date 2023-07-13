@@ -1,17 +1,13 @@
 package org.temkarus0070.vkwallcleaner.services.datesParsers;
 
-import com.vk.api.sdk.objects.wall.WallpostFull;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.time.Month;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Component
 public class NumericDatesParser implements DatesParser {
@@ -20,16 +16,16 @@ public class NumericDatesParser implements DatesParser {
 
     @Override
     public List<LocalDate> getDates(String text, int postYear) {
-        List<LocalDate>localDates=new ArrayList<>();
+        List<LocalDate> localDates = new ArrayList<>();
         Pattern datePattern = Pattern.compile("[0-9]+\\.[0-9]+\\.?[0-9]*[ ]*", Pattern.CASE_INSENSITIVE);
         Matcher datePatternMatcher = datePattern.matcher(text);
 
         try {
 
-           while (datePatternMatcher.find()) {
+            while (datePatternMatcher.find()) {
 
                 String group = datePatternMatcher.group();
-               List<String> monthsDates = new ArrayList<>();
+                List<String> monthsDates = new ArrayList<>();
                 monthsDates.add(group);
 
                 List<String> correctMonths = monthsDates.stream()
@@ -47,9 +43,10 @@ public class NumericDatesParser implements DatesParser {
                                                         })
                                                         .toList();
                 if (!correctMonths.isEmpty()) {
-                  localDates.addAll(correctMonths.stream()
-                                                 .map(e -> this.parseDate(e, postYear))
-                                                 .toList());
+                    localDates.addAll(correctMonths.stream()
+                                                   .map(e -> this.parseDate(e, postYear))
+                                                   .filter(e -> e.equals(LocalDate.MIN))
+                                                   .toList());
                 }
 
             }
@@ -64,12 +61,17 @@ public class NumericDatesParser implements DatesParser {
         Pattern extendDatePattern = Pattern.compile("[0-9]+\\.[0-9]+\\.[0-9]+");
         Matcher extendDateMatcher = extendDatePattern.matcher(date);
         String[] dateParts = date.split("\\.");
-        if (extendDateMatcher.find() && Integer.parseInt(dateParts[2].trim()) >= MIN_YEAR) {
-            return LocalDate.of(Integer.parseInt(dateParts[2].trim()),
-                                Integer.parseInt(dateParts[1].trim()),
-                                Integer.parseInt(dateParts[0].trim()));
-        } else {
-            return LocalDate.of(postYear, Integer.parseInt(dateParts[1].trim()), Integer.parseInt(dateParts[0].trim()));
+        try {
+
+            if (extendDateMatcher.find() && Integer.parseInt(dateParts[2].trim()) >= MIN_YEAR) {
+                return LocalDate.of(Integer.parseInt(dateParts[2].trim()),
+                                    Integer.parseInt(dateParts[1].trim()),
+                                    Integer.parseInt(dateParts[0].trim()));
+            } else {
+                return LocalDate.of(postYear, Integer.parseInt(dateParts[1].trim()), Integer.parseInt(dateParts[0].trim()));
+            }
+        } catch (Exception ex) {
+            return LocalDate.MIN;
         }
     }
 

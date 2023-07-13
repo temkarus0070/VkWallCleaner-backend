@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Component
 public class TextDatesParser implements DatesParser {
@@ -58,8 +57,12 @@ public class TextDatesParser implements DatesParser {
                 strings.add(ourMatcher.group());
             }
         });
-        if (!allMatches.isEmpty()) {
-            return parseDate(regexesDates, text, postYear);
+        try {
+            if (!allMatches.isEmpty()) {
+                return parseDate(regexesDates, text, postYear);
+            }
+        } catch (Exception ex) {
+            System.out.println(ex);
         }
         return new ArrayList<>();
 
