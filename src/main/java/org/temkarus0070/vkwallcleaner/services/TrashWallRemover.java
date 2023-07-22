@@ -18,7 +18,6 @@ import org.temkarus0070.vkwallcleaner.services.datesParsers.DatesExtractor;
 import java.net.URI;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -120,7 +119,7 @@ public class TrashWallRemover {
 
         List<WallpostFull> wallPosts = userWallParser.findWallPosts(predicates);
 
-        //  removePosts(wallPosts, vkApiClientUserActor);
+          removePosts(wallPosts, vkApiClientUserActor);
         User user = userService.getCurrentUser(userService.getCurrentUserVkId())
                                .orElse(new User());
         user.getActiveRemovedGiveawaysPosts()
@@ -151,95 +150,15 @@ public class TrashWallRemover {
                                                                       .get(PredicateType.CURRENT_YEAR_GIVEAWAYS);
 
         List<WallpostFull> wallPosts = userWallParser.findWallPosts(predicates);
-        List<URI> collect = wallPosts.stream()
-                                     .map(e -> e.getPostSource()
-                                                .getUrl())
-                                     .toList();
         return removePosts(wallPosts, vkApiClientUserActor);
 
     }
 
     // TODO refactor case when giveaway ends on february when we clean in december previous year
     public int removePastGiveaways() throws ClientException, ApiException {
-        LocalDate now = LocalDate.now();
         Map.Entry<VkApiClient, UserActor> vkApiClientUserActor = buildClient();
-        List<Predicate<WallpostFull>> predicates = new ArrayList<>();
-        User user = this.userService.getCurrentUser(this.userService.getCurrentUserVkId())
-                                    .orElseGet(User::new);
-
-        predicates.add(post -> {
-            List<Wallpost> copyHistory = post.getCopyHistory();
-            if (copyHistory != null && !copyHistory.isEmpty()) {
-                Wallpost repost = copyHistory.get(0);
-                String text = repost.getText()
-                                    .toLowerCase();
-                if (user.getExclusionsPosts()
-                        .stream()
-                        .map(org.temkarus0070.vkwallcleaner.entities.Wallpost::getText)
-                        .map(String::toLowerCase)
-                        .noneMatch(text::contains)) {
-                    LocalDateTime postDate = LocalDateTime.ofEpochSecond(post.getDate(), 0, ZoneOffset.ofHours(3));
-                    List<LocalDate> parsedDates = datesExtractor.dates(text, postDate);
-                    if (!parsedDates.isEmpty() && postDate.getYear() < now.getYear()) {
-                        if (parsedDates.stream()
-                                       .max(LocalDate::compareTo)
-                                       .get()
-                                       .isBefore(now)) {
-                            return true;
-                        }
-                    }
-                }
-
-            }
-            return false;
-        });
-
-        predicates.add(wallpostFull -> {
-            LocalDateTime postDate = LocalDateTime.ofEpochSecond(wallpostFull.getDate(), 0, ZoneOffset.ofHours(3));
-            List<Wallpost> copyHistory = wallpostFull.getCopyHistory();
-            if (copyHistory != null && !copyHistory.isEmpty()) {
-                Wallpost repost = copyHistory.get(0);
-                String text = repost.getText()
-                                    .toLowerCase();
-                List<LocalDate> parsedDates = datesExtractor.dates(text, postDate);
-                if (parsedDates.isEmpty() && text.contains("завтра") && giveawaysWords.stream()
-                                                                                      .anyMatch(text::contains) &&
-                        postDate.toLocalDate()
-                                .datesUntil(now)
-                                .count() >= 2) {
-                    return true;
-                }
-
-            }
-            return false;
-        });
-        predicates.add(wallpostFull -> {
-            LocalDateTime postDate = LocalDateTime.ofEpochSecond(wallpostFull.getDate(), 0, ZoneOffset.ofHours(3));
-            List<Wallpost> copyHistory = wallpostFull.getCopyHistory();
-            if (copyHistory != null && !copyHistory.isEmpty()) {
-                Wallpost repost = copyHistory.get(0);
-                String text = repost.getText()
-                                    .toLowerCase();
-                List<LocalDate> parsedDates = datesExtractor.dates(text, postDate);
-                if (parsedDates.isEmpty() && giveawaysWords.stream()
-                                                           .anyMatch(text::contains)) {
-                    return true;
-                }
-
-            }
-            return false;
-        });
-
-        predicates.add(wallpostFull -> {
-            List<Wallpost> copyHistory = wallpostFull.getCopyHistory();
-            if (copyHistory != null && !copyHistory.isEmpty()) {
-                Wallpost repost = copyHistory.get(0);
-                if (repost.getIsDeleted() != null && repost.getIsDeleted()) {
-                    return true;
-                }
-            }
-            return false;
-        });
+        List<Predicate<WallpostFull>> predicates = wallpostsPredicates.getPredicatesMap()
+                                                                      .get(PredicateType.LAST_YEARS);
 
         List<WallpostFull> wallPosts = userWallParser.findWallPosts(predicates);
 

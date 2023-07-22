@@ -27,8 +27,10 @@ public class DatesExtractor {
                                               .flatMap(Collection::stream)
                                               .sorted(LocalDate::compareTo)
                                               .collect(Collectors.toList());
-        if (collect.stream()
-                   .anyMatch(e -> e.isBefore(postDate.toLocalDate()))) {
+        if (!collect.isEmpty() && collect.stream()
+                                         .max(LocalDate::compareTo)
+                                         .get()
+                                         .isBefore(postDate.toLocalDate())) {
             return collect.stream()
                           .map(e -> LocalDate.of(e.getYear() + 1, e.getMonthValue(), e.getDayOfMonth()))
                           .toList();

@@ -45,7 +45,7 @@ public class NumericDatesParser implements DatesParser {
                 if (!correctMonths.isEmpty()) {
                     localDates.addAll(correctMonths.stream()
                                                    .map(e -> this.parseDate(e, postYear))
-                                                   .filter(e -> e.equals(LocalDate.MIN))
+                                                   .filter(e -> !e.equals(LocalDate.MIN))
                                                    .toList());
                 }
 

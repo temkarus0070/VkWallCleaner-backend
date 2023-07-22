@@ -17,7 +17,7 @@ import java.util.Map;
 import java.util.function.Predicate;
 
 enum PredicateType {
-    ALL, CURRENT_YEAR_GIVEAWAYS
+    ALL, LAST_YEARS, CURRENT_YEAR_GIVEAWAYS
 }
 
 @Component
@@ -75,7 +75,8 @@ public class WallpostsPredicates {
         });
 
         predicates.add(wallpostFull -> {
-
+            User user = this.userService.getCurrentUser(this.userService.getCurrentUserVkId())
+                                        .orElseGet(User::new);
             LocalDate now = LocalDate.now();
             LocalDateTime postDate = LocalDateTime.ofEpochSecond(wallpostFull.getDate(), 0, ZoneOffset.ofHours(3));
             List<Wallpost> copyHistory = wallpostFull.getCopyHistory();
@@ -84,11 +85,16 @@ public class WallpostsPredicates {
                 String text = repost.getText()
                                     .toLowerCase();
                 List<LocalDate> parsedDates = datesExtractor.dates(text, postDate);
-                if (parsedDates.isEmpty() && text.contains("завтра") && giveawaysWords.stream()
-                                                                                      .anyMatch(text::contains) &&
-                        postDate.toLocalDate()
-                                .datesUntil(now)
-                                .count() >= 2) {
+                if (user.getExclusionsPosts()
+                        .stream()
+                        .map(org.temkarus0070.vkwallcleaner.entities.Wallpost::getText)
+                        .map(String::toLowerCase)
+                        .noneMatch(text::contains) && parsedDates.isEmpty() && text.contains("завтра") && giveawaysWords.stream()
+                                                                                                                        .anyMatch(
+                                                                                                                            text::contains)
+                        && postDate.toLocalDate()
+                                   .datesUntil(now)
+                                   .count() >= 2) {
                     return true;
                 }
 
@@ -110,17 +116,123 @@ public class WallpostsPredicates {
 
         predicates = new ArrayList<>(predicatesMap.get(PredicateType.CURRENT_YEAR_GIVEAWAYS));
         predicates.add(e -> {
+            User user = this.userService.getCurrentUser(this.userService.getCurrentUserVkId())
+                                        .orElseGet(User::new);
             if (e.getCopyHistory() != null && !e.getCopyHistory()
                                                 .isEmpty() && giveawaysWords.stream()
                                                                             .anyMatch(e.getCopyHistory()
                                                                                        .get(0)
                                                                                        .getText()
-                                                                                       .toLowerCase()::contains)) {
+                                                                                       .toLowerCase()::contains)
+                    && user.getExclusionsPosts()
+                           .stream()
+                           .map(org.temkarus0070.vkwallcleaner.entities.Wallpost::getText)
+                           .map(String::toLowerCase)
+                           .noneMatch(e.getCopyHistory()
+                                       .get(0)
+                                       .getText()
+                                       .toLowerCase()::contains)) {
                 return true;
             }
             return false;
         });
         predicatesMap.put(PredicateType.ALL, predicates);
+        predicates = new ArrayList<>();
+        predicates.add(e -> {
+            LocalDateTime postDate = LocalDateTime.ofEpochSecond(e.getDate(), 0, ZoneOffset.ofHours(3));
+            if (postDate.getYear() < LocalDate.now()
+                                              .getYear() && e.getCopyHistory() != null && !e.getCopyHistory()
+                                                                                            .isEmpty() && giveawaysWords.stream()
+                                                                                                                        .anyMatch(
+                                                                                                                            e.getCopyHistory()
+                                                                                                                             .get(
+                                                                                                                                 0)
+                                                                                                                             .getText()
+                                                                                                                             .toLowerCase()::contains)) {
+                return true;
+            }
+            return false;
+        });
+        predicates.add(e -> {
+            LocalDateTime postDate = LocalDateTime.ofEpochSecond(e.getDate(), 0, ZoneOffset.ofHours(3));
+            if (postDate.getYear() < LocalDate.now()
+                                              .getYear() && e.getAttachments() != null && !e.getAttachments()
+                                                                                            .isEmpty() && giveawaysWords.stream()
+                                                                                                                        .anyMatch(
+                                                                                                                            word -> e.getAttachments()
+                                                                                                                                     .stream()
+                                                                                                                                     .filter(
+                                                                                                                                         e3 ->
+                                                                                                                                             e3.getVideo()
+                                                                                                                                                 != null)
+                                                                                                                                     .map(
+                                                                                                                                         e3 -> e3.getVideo()
+                                                                                                                                                 .getTitle()
+                                                                                                                                                 .toLowerCase())
+                                                                                                                                     .anyMatch(
+                                                                                                                                         e3 -> e3.contains(
+                                                                                                                                             word)))) {
+                return true;
+            }
+            return false;
+        });
+        predicates.add(e -> {
+            LocalDateTime postDate = LocalDateTime.ofEpochSecond(e.getDate(), 0, ZoneOffset.ofHours(3));
+            if (postDate.getYear() < LocalDate.now()
+                                              .getYear() && e.getAttachments() != null && !e.getAttachments()
+                                                                                            .isEmpty() && giveawaysWords.stream()
+                                                                                                                        .anyMatch(
+                                                                                                                            word -> e.getAttachments()
+                                                                                                                                     .stream()
+                                                                                                                                     .filter(
+                                                                                                                                         e3 ->
+                                                                                                                                             e3.getVideo()
+                                                                                                                                                 != null)
+                                                                                                                                     .map(
+                                                                                                                                         e3 -> e3.getVideo()
+                                                                                                                                                 .getTitle()
+                                                                                                                                                 .toLowerCase())
+                                                                                                                                     .anyMatch(
+                                                                                                                                         e3 -> e3.contains(
+                                                                                                                                             word)))) {
+                return true;
+            }
+            return false;
+        });
+        predicates.add(e -> {
+            LocalDateTime postDate = LocalDateTime.ofEpochSecond(e.getDate(), 0, ZoneOffset.ofHours(3));
+            if (postDate.getYear() < LocalDate.now()
+                                              .getYear() && e.getAttachments() != null && !e.getAttachments()
+                                                                                            .isEmpty() && giveawaysWords.stream()
+                                                                                                                        .anyMatch(
+                                                                                                                            word -> e.getAttachments()
+                                                                                                                                     .stream()
+                                                                                                                                     .filter(
+                                                                                                                                         e3 ->
+                                                                                                                                             e3.getLink()
+                                                                                                                                                 != null)
+                                                                                                                                     .map(
+                                                                                                                                         e3 -> e3.getLink()
+                                                                                                                                                 .getTitle()
+                                                                                                                                                 .toLowerCase())
+                                                                                                                                     .anyMatch(
+                                                                                                                                         e3 -> e3.contains(
+                                                                                                                                             word)))) {
+                return true;
+            }
+            return false;
+        });
+        predicates.add(e -> {
+            LocalDateTime postDate = LocalDateTime.ofEpochSecond(e.getDate(), 0, ZoneOffset.ofHours(3));
+            if (postDate.getYear() < LocalDate.now()
+                                              .getYear() && e.getText() != null && giveawaysWords.stream()
+                                                                                                 .anyMatch(word -> e.getText()
+                                                                                                                    .contains(word))) {
+                return true;
+            }
+            return false;
+        });
+        predicatesMap.put(PredicateType.LAST_YEARS, predicates);
     }
 
 }
