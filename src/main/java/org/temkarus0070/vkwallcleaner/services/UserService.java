@@ -35,4 +35,8 @@ public class UserService {
     public Optional<User> getCurrentUser(int currentUserVkId) {
         return userRepository.findById(currentUserVkId);
     }
+
+    public void saveUser(User user) {
+        this.userRepository.save(user);
+    }
 }

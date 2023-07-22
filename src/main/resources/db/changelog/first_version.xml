@@ -1,6 +1,6 @@
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd">
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
 
     <changeSet id="1" author="temkarus0070">
         <createTable tableName="users">
@@ -57,8 +57,6 @@
                                  referencedColumnNames="vk_id"/>
     </changeSet>
 
-
-
     <changeSet id="2" author="temkarus0070">
         <createTable tableName="GIVEAWAYS_SOURCES">
             <column name="user_id" type="int">
@@ -73,5 +71,30 @@
                                  constraintName="user_deleted_post_groups_user_fk"
                                  referencedTableName="users"
                                  referencedColumnNames="vk_id"/>
+    </changeSet>
+    <changeSet id="3" author="temkarus0070">
+
+        <createTable tableName="ACTIVE_REMOVED_POSTS">
+            <column name="post_id" type="int">
+
+            </column>
+            <column name="author_id" type="int">
+
+            </column>
+            <column name="text" type="text"/>
+            <column name="user_vk_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+
+        <addForeignKeyConstraint baseTableName="ACTIVE_REMOVED_POSTS" baseColumnNames="user_vk_id"
+                                 constraintName="ACTIVE_REMOVED_POSTS_user_fk"
+                                 referencedTableName="users"
+                                 referencedColumnNames="vk_id"/>
+
+        <addColumn tableName="exclusions_posts">
+            <column name="author_id" type="bigint"/>
+        </addColumn>
+
     </changeSet>
 </databaseChangeLog>

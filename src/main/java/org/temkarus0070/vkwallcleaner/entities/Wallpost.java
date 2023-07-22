@@ -13,5 +13,6 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Wallpost {
     private int postId;
+    private int authorId;
     private String text;
 }
